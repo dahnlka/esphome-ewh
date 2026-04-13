@@ -235,9 +235,9 @@ fan::FanTraits EHUFan::get_traits() {
   auto traits = fan::FanTraits();
   traits.set_speed(true);
   traits.set_supported_speed_count(3);
-  this->set_supported_preset_modes({PRESET_AUTO.c_str(), PRESET_HEALTH.c_str(), PRESET_NIGHT.c_str(),
-                                    PRESET_BABY.c_str(), PRESET_FITNESS.c_str(), PRESET_YOGA.c_str(),
-                                    PRESET_MEDITATION.c_str(), PRESET_PRANA.c_str(), PRESET_MANUAL.c_str()});
+  traits.set_supported_preset_modes({PRESET_AUTO.c_str(), PRESET_HEALTH.c_str(), PRESET_NIGHT.c_str(),
+                                     PRESET_BABY.c_str(), PRESET_FITNESS.c_str(), PRESET_YOGA.c_str(),
+                                     PRESET_MEDITATION.c_str(), PRESET_PRANA.c_str(), PRESET_MANUAL.c_str()});
   return traits;
 }
 
