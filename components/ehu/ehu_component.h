@@ -150,6 +150,7 @@ class EHUFan : public Component, public fan::Fan, Parented<EHUComponent> {
   explicit EHUFan(EHUComponent *c) : Parented(c) {}
   fan::FanTraits get_traits() override;
   void control(const fan::FanCall &call) override;
+  bool update_preset_mode(const std::string &preset) { return this->set_preset_mode_(preset); }
 };
 
 template<uint16_t cmd_v> class EHUNumber : public number::Number, public EHUCommandComponent<cmd_v> {

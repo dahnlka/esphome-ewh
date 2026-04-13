@@ -126,8 +126,8 @@ void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
   }
 
   auto &preset = this->get_fan_preset_(state);
-  if (preset != this->fan_->preset_mode) {
-    this->fan_->preset_mode = preset;
+  auto *ehu_fan = static_cast<EHUFan *>(this->fan_);
+  if (ehu_fan->update_preset_mode(preset)) {
     has_changes = true;
   }
 
@@ -227,16 +227,17 @@ void EHUFan::control(const fan::FanCall &call) {
     this->parent_->set_fan_speed_(*call.get_speed());
   }
 
-  this->parent_->write_fan_preset_(call.get_preset_mode());
+  if (call.get_preset_mode())
+    this->parent_->write_fan_preset_(call.get_preset_mode());
 }
 
 fan::FanTraits EHUFan::get_traits() {
   auto traits = fan::FanTraits();
   traits.set_speed(true);
   traits.set_supported_speed_count(3);
-  traits.set_supported_preset_modes(
-      {PRESET_AUTO, PRESET_HEALTH, PRESET_NIGHT, PRESET_BABY, PRESET_FITNESS, PRESET_YOGA, PRESET_MEDITATION,
-       PRESET_PRANA, PRESET_MANUAL});
+  this->set_supported_preset_modes({PRESET_AUTO.c_str(), PRESET_HEALTH.c_str(), PRESET_NIGHT.c_str(),
+                                    PRESET_BABY.c_str(), PRESET_FITNESS.c_str(), PRESET_YOGA.c_str(),
+                                    PRESET_MEDITATION.c_str(), PRESET_PRANA.c_str(), PRESET_MANUAL.c_str()});
   return traits;
 }
 
