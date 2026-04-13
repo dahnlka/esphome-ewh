@@ -28,15 +28,6 @@ static const std::string LED_PRESET_BLUE = "Blue";      // 02 - синий
 static const std::string LED_PRESET_GREEN = "Green";    // 03 - зеленый
 static const std::string LED_PRESET_WHITE = "White";    // 04 - белый.
 
-#define ALL_FAN_PRESETS \
-  { \
-    PRESET_AUTO, PRESET_HEALTH, PRESET_NIGHT, PRESET_BABY, PRESET_FITNESS, PRESET_YOGA, PRESET_MEDITATION, \
-        PRESET_PRANA, PRESET_MANUAL, \
-  }
-
-#define ALL_LED_PRESETS \
-  { LED_PRESET_OFF, LED_PRESET_RANDOM, LED_PRESET_BLUE, LED_PRESET_GREEN, LED_PRESET_WHITE }
-
 void EHUComponent::dump_config_(const char *TAG) const {
   LOG_SENSOR("  ", "Temperature", this->temperature_);
   LOG_SENSOR("  ", "Humidity", this->humidity_);
@@ -109,7 +100,7 @@ void EHUComponent::on_state(const ehu_state_t &state) {
 
   if (this->led_preset_) {
     auto &preset = this->get_led_preset_(state);
-    if (!preset.empty() && this->led_preset_->state != preset) {
+    if (!preset.empty() && this->led_preset_->current_option() != preset) {
       this->led_preset_->publish_state(preset);
     }
   }
@@ -135,8 +126,8 @@ void EHUComponent::publish_fan_state_(const ehu_state_t &state) {
   }
 
   auto &preset = this->get_fan_preset_(state);
-  if (preset != this->fan_->get_preset_mode()) {
-    this->fan_->set_preset_mode(preset);
+  if (preset != this->fan_->preset_mode) {
+    this->fan_->preset_mode = preset;
     has_changes = true;
   }
 
@@ -243,13 +234,22 @@ fan::FanTraits EHUFan::get_traits() {
   auto traits = fan::FanTraits();
   traits.set_speed(true);
   traits.set_supported_speed_count(3);
-  traits.set_supports_preset(true);
+  traits.set_supported_preset_modes(
+      {PRESET_AUTO, PRESET_HEALTH, PRESET_NIGHT, PRESET_BABY, PRESET_FITNESS, PRESET_YOGA, PRESET_MEDITATION,
+       PRESET_PRANA, PRESET_MANUAL});
   return traits;
 }
 
-void EHUFanPreset::setup() { this->traits.set_options(ALL_FAN_PRESETS); }
+void EHUFanPreset::setup() {
+  this->traits.set_options({PRESET_AUTO.c_str(), PRESET_HEALTH.c_str(), PRESET_NIGHT.c_str(), PRESET_BABY.c_str(),
+                            PRESET_FITNESS.c_str(), PRESET_YOGA.c_str(), PRESET_MEDITATION.c_str(),
+                            PRESET_PRANA.c_str(), PRESET_MANUAL.c_str()});
+}
 
-void EHULedPreset::setup() { this->traits.set_options(ALL_LED_PRESETS); }
+void EHULedPreset::setup() {
+  this->traits.set_options({LED_PRESET_OFF.c_str(), LED_PRESET_RANDOM.c_str(), LED_PRESET_BLUE.c_str(),
+                            LED_PRESET_GREEN.c_str(), LED_PRESET_WHITE.c_str()});
+}
 
 void EHULedPreset::control(const std::string &value) {
   if (value.empty()) {
